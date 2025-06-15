@@ -33,7 +33,7 @@ struct GameCardView: View {
             }
         }
         .padding()
-        .background(Color(.secondarySystemBackground))
+        .background(Color.secondary)
         .cornerRadius(12)
         .shadow(radius: 2)
     }

@@ -3,6 +3,7 @@ import Foundation
 
 struct GameDetailView: View {
     var game: Game
+    @State private var showingLogSheet = false
 
     var body: some View {
         ScrollView {
@@ -43,11 +44,17 @@ struct GameDetailView: View {
                     .font(.headline)
                 Text(game.review)
 
-                Spacer()
+                Button("Log this game") {
+                    showingLogSheet = true
+                }
+                .buttonStyle(.borderedProminent)
+                .padding(.top)
             }
             .padding()
         }
         .navigationTitle(game.title)
-        .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showingLogSheet) {
+            LogGameView(game: game)
+        }
     }
 }
