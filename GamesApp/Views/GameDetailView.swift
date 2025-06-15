@@ -1,3 +1,53 @@
 import SwiftUI
 import Foundation
 
+struct GameDetailView: View {
+    var game: Game
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                if let imageUrl = game.image, let url = URL(string: imageUrl) {
+                    AsyncImage(url: url) { image in
+                        image.resizable().scaledToFit()
+                    } placeholder: {
+                        Rectangle().fill(Color.gray.opacity(0.3))
+                    }
+                    .frame(height: 200)
+                    .cornerRadius(12)
+                }
+
+                Text(game.title)
+                    .font(.largeTitle).bold()
+
+                Text("by \(game.developer)")
+                    .font(.title3).foregroundColor(.secondary)
+
+                Text(game.desc)
+                    .font(.body)
+
+                Divider()
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Genres:")
+                        .font(.headline)
+                    WrapHStack(tags: game.genres)
+
+                    Text("Platforms:")
+                        .font(.headline)
+                    WrapHStack(tags: game.platform)
+                }
+
+                Divider()
+                Text("Review")
+                    .font(.headline)
+                Text(game.review)
+
+                Spacer()
+            }
+            .padding()
+        }
+        .navigationTitle(game.title)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
