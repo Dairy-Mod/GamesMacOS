@@ -1,12 +1,17 @@
-
 import SwiftUI
+
+struct SuccessAlert: Identifiable {
+    var id: String { message }
+    let message: String
+}
 
 struct ProfileView: View {
     @EnvironmentObject var session: UserSession
     @State private var selectedStatus: GameStatus = .backlog
     @State private var allGames: [Game] = []
-    @State private var errorMessage: String? = nil
-    @State private var showAlert = false
+    @State private var isLoading = true
+    @State private var errorMessage: String?
+    @State private var successMessage: SuccessAlert?
 
     var body: some View {
         VStack {
@@ -30,19 +35,55 @@ struct ProfileView: View {
             .pickerStyle(SegmentedPickerStyle())
             .padding()
 
-            List(filteredGames) { game in
-                GameCardView(game: game)
+            if isLoading {
+                ProgressView("Loading...")
+                    .padding()
+            } else {
+                List {
+                    ForEach(filteredGames) { game in
+                        VStack(alignment: .leading) {
+                            GameCardView(game: game)
+
+                            HStack {
+                                Spacer()
+                                Button(role: .destructive) {
+                                    Task {
+                                        await deleteGame(game)
+                                    }
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                                .buttonStyle(.borderedProminent)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                }
+            }
+
+            if let error = errorMessage {
+                Text(error)
+                    .foregroundColor(.red)
+                    .padding()
             }
         }
         .navigationTitle("My Games")
         .task {
-            await loadProfile()
+            do {
+                let allUsuarioGames = try await UsuarioGameService.shared.fetchAll()
+                if let userId = session.currentUser?.id {
+                    session.usuarioGames = allUsuarioGames.filter { $0.usuarioId == userId }
+                }
+                allGames = try await GameService.shared.fetchGames()
+            } catch {
+                errorMessage = "Failed to load data: \(error.localizedDescription)"
+            }
+            isLoading = false
         }
-        .alert("Error", isPresented: $showAlert) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text(errorMessage ?? "Unknown error")
+        .alert(item: $successMessage) { message in
+            Alert(title: Text(message.message))
         }
+
     }
 
     var filteredGames: [Game] {
@@ -50,21 +91,24 @@ struct ProfileView: View {
             .filter { $0.status == selectedStatus }
             .map { $0.juegoId }
 
-        return allGames.compactMap { game in
-            guard let id = game.id, gameIds.contains(id) else { return nil }
-            return game
-        }
+        return allGames.filter { gameIds.contains($0.id ?? UUID()) }
     }
 
-    func loadProfile() async {
-        do {
-            let allUsuarioGames = try await UsuarioGameService.shared.fetchAll()
-            session.usuarioGames = allUsuarioGames.filter { $0.usuarioId == session.currentUser?.id }
+    func deleteGame(_ game: Game) async {
+        guard let userId = session.currentUser?.id else { return }
 
-            allGames = try await GameService.shared.fetchGames()
-        } catch {
-            errorMessage = "Error loading profile: \(error.localizedDescription)"
-            showAlert = true
+        if let toDelete = session.usuarioGames.first(where: {
+            $0.juegoId == game.id && $0.usuarioId == userId
+        }), let id = toDelete.id {
+            do {
+                try await UsuarioGameService.shared.delete(id: id)
+                session.usuarioGames.removeAll { $0.id == id }
+                successMessage = SuccessAlert(message: "Game deleted successfuly")
+            } catch {
+                errorMessage = "Error deleting game: \(error.localizedDescription)"
+            }
         }
     }
 }
+
+
