@@ -8,17 +8,34 @@
 import SwiftUI
 
 struct ContentView: View {
-    var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
-    }
-}
+    @EnvironmentObject var session: UserSession
+    @State private var selection: SidebarItem? = .explore
 
-#Preview {
-    ContentView()
+    enum SidebarItem: Hashable {
+        case explore
+        case profile
+    }
+
+    var body: some View {
+        NavigationSplitView {
+            List(selection: $selection) {
+                NavigationLink(value: SidebarItem.explore) {
+                    Label("Explorar", systemImage: "gamecontroller")
+                }
+                NavigationLink(value: SidebarItem.profile) {
+                    Label("Mi Perfil", systemImage: "person.circle")
+                }
+            }
+            .navigationTitle("BacklogApp")
+        } detail: {
+            switch selection {
+            case .explore, .none:
+                MainView()
+                    .environmentObject(session)
+            case .profile:
+                ProfileView()
+                    .environmentObject(session)
+            }
+        }
+    }
 }
