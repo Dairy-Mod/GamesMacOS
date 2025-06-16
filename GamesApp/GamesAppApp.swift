@@ -1,10 +1,3 @@
-//
-//  GamesAppApp.swift
-//  GamesApp
-//
-//  Created by FAMILIA AMADOR YNFANTE on 14/06/25.
-//
-
 import SwiftUI
 
 @main

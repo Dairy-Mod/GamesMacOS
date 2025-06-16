@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  GamesApp
-//
-//  Created by FAMILIA AMADOR YNFANTE on 14/06/25.
-//
-
 import SwiftUI
 
 struct ContentView: View {
@@ -20,10 +13,10 @@ struct ContentView: View {
         NavigationSplitView {
             List(selection: $selection) {
                 NavigationLink(value: SidebarItem.explore) {
-                    Label("Explorar", systemImage: "gamecontroller")
+                    Label("Explore", systemImage: "gamecontroller")
                 }
                 NavigationLink(value: SidebarItem.profile) {
-                    Label("Mi Perfil", systemImage: "person.circle")
+                    Label("My Profile", systemImage: "person.circle")
                 }
             }
             .navigationTitle("BacklogApp")

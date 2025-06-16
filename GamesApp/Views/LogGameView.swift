@@ -8,15 +8,16 @@ struct LogGameView: View {
     @State private var rating: Double = 3
     @State private var review: String = ""
     @State private var status: GameStatus = .backlog
+    @State private var errorMessage: String?
 
     var body: some View {
         NavigationView {
             Form {
                 Section(header: Text("Rating")) {
-                    Slider(value: $rating, in: 0...5, step: 0.5) {
+                    Slider(value: $rating, in: 0...10, step: 0.5) {
                         Text("Rating")
                     }
-                    Text("\(rating, specifier: "%.1f") / 5.0")
+                    Text("\(rating, specifier: "%.1f") / 10")
                 }
 
                 Section(header: Text("Status")) {
@@ -24,15 +25,23 @@ struct LogGameView: View {
                         ForEach(GameStatus.allCases) { s in
                             Text(s.rawValue).tag(s)
                         }
-                    }.pickerStyle(SegmentedPickerStyle())
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
                 }
 
                 Section(header: Text("Review")) {
                     TextEditor(text: $review)
                         .frame(height: 100)
                 }
+
+                if let error = errorMessage {
+                    Section {
+                        Text(error)
+                            .foregroundColor(.red)
+                    }
+                }
             }
-            .navigationTitle("Log Game")
+            .navigationTitle("Log '\(game.title)'")
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
@@ -40,7 +49,9 @@ struct LogGameView: View {
                             await saveLog()
                         }
                     }
+                    .disabled(review.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
+
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
@@ -67,7 +78,7 @@ struct LogGameView: View {
             try await UsuarioGameService.shared.create(log)
             dismiss()
         } catch {
-            print("Error saving log: \(error)")
+            errorMessage = "Failed to save: \(error.localizedDescription)"
         }
     }
 }

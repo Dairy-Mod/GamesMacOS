@@ -4,6 +4,7 @@ import Foundation
 struct GameDetailView: View {
     var game: Game
     @State private var showingLogSheet = false
+    @EnvironmentObject var session: UserSession
 
     var body: some View {
         ScrollView {
@@ -40,15 +41,23 @@ struct GameDetailView: View {
                 }
 
                 Divider()
+
                 Text("Review")
                     .font(.headline)
                 Text(game.review)
 
-                Button("Log this game") {
-                    showingLogSheet = true
+                if let userId = session.currentUser?.id {
+                    NavigationLink("Add to My Games") {
+                        UsuarioGameFormView(game: game, onSave: {
+                            Task {
+                                session.usuarioGames = try await UsuarioGameService.shared.fetchAll()
+                                    .filter { $0.usuarioId == userId }
+                            }
+                        })
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .padding(.top)
                 }
-                .buttonStyle(.borderedProminent)
-                .padding(.top)
             }
             .padding()
         }
@@ -58,3 +67,4 @@ struct GameDetailView: View {
         }
     }
 }
+
