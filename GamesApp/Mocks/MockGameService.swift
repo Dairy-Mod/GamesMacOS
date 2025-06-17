@@ -16,7 +16,7 @@ class MockGameService {
                 publisher: "Bethesda Softworks",
                 platform: ["PC", "Xbox"],
                 genres: ["RPG", "Adventure"],
-                image: nil
+                image: "image"
             ),
             Game(
                 id: UUID(),
@@ -29,7 +29,7 @@ class MockGameService {
                 publisher: "Team Cherry",
                 platform: ["PC", "Switch"],
                 genres: ["Metroidvania", "Action"],
-                image: nil
+                image: "image"
             )
         ]
         

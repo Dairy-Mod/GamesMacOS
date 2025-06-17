@@ -70,11 +70,11 @@ struct ProfileView: View {
         .navigationTitle("My Games")
         .task {
             do {
-                let allUsuarioGames = try await UsuarioGameService.shared.fetchAll()
+                let allUsuarioGames = try await MockUsuarioGameService.shared.fetchAll(for: session.currentUser?.id ?? UUID())
                 if let userId = session.currentUser?.id {
                     session.usuarioGames = allUsuarioGames.filter { $0.usuarioId == userId }
                 }
-                allGames = try await GameService.shared.fetchGames()
+                allGames = try await MockGameService.shared.fetchGames()
             } catch {
                 errorMessage = "Failed to load data: \(error.localizedDescription)"
             }

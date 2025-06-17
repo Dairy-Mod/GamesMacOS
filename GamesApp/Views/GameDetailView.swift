@@ -50,7 +50,7 @@ struct GameDetailView: View {
                     NavigationLink("Add to My Games") {
                         UsuarioGameFormView(game: game, onSave: {
                             Task {
-                                session.usuarioGames = try await UsuarioGameService.shared.fetchAll()
+                                session.usuarioGames = try await MockUsuarioGameService.shared.fetchAll(for: session.currentUser?.id ?? UUID())
                                     .filter { $0.usuarioId == userId }
                             }
                         })

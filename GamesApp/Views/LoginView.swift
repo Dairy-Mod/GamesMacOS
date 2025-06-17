@@ -35,7 +35,7 @@ struct LoginView: View {
         .onAppear {
             Task {
                 do {
-                    users = try await UserService.shared.fetchUsers()
+                    users = try await MockUserService.shared.fetchUsers()
                 } catch {
                     print("Failed to fetch userss: \(error)")
                 }
