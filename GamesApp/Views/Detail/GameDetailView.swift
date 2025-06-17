@@ -96,12 +96,20 @@ struct GameDetailView: View {
 
                         // Log Game
                         HStack(spacing: 16) {
-                            Button("Log Game") {
+                            Button(action: {
                                 // Acción
+                            }) {
+                                Text("Log Game")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 6)
+                                    .background(Color.blue.opacity(0.8))
+                                    .cornerRadius(6)
+                                    .shadow(radius: 2)
                             }
                             .buttonStyle(.plain)
-                            .foregroundColor(.blue)
-                            .font(.headline)
+
 
                             HStack(spacing: 4) {
                                 ForEach(1...5, id: \.self) { index in
