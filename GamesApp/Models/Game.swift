@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-struct Game: Identifiable, Codable {
+struct Game: Identifiable, Codable, Hashable {
     var id: UUID?
     var title: String
     var desc: String

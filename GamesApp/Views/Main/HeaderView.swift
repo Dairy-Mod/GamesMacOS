@@ -2,6 +2,9 @@ import SwiftUI
 
 struct HeaderView: View {
     @Binding var searchText: String
+    @Binding var showLogin: Bool
+    @Binding var showRegister: Bool
+    @Binding var navigateToProfile: Bool
     @EnvironmentObject var session: UserSession
 
     var body: some View {
@@ -23,7 +26,6 @@ struct HeaderView: View {
             }
             .frame(height: 200)
 
-            // Contenido sobre la imagen
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Text("BacklogApp")
@@ -32,34 +34,50 @@ struct HeaderView: View {
 
                     Spacer()
 
-                    // Login/Register o Nombre de Usuario
-                    if let username = session.currentUser?.username {
-                        Text(username)
-                            .foregroundColor(.white)
-                            .font(.subheadline.bold())
-                    } else {
-                        HStack(spacing: 16) {
-                            Button("Login") {
-                                // Acción de login
+                    if session.currentUser == nil {
+                        HStack(spacing: 12) {
+                            Button(action: { showLogin = true }) {
+                                Text("Login")
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(8)
                             }
                             .buttonStyle(.plain)
-                            .foregroundColor(.white)
 
-                            Button("Register") {
-                                // Acción de registro
+                            Button(action: { showRegister = true }) {
+                                Text("Register")
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(Color.green)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(8)
                             }
                             .buttonStyle(.plain)
-                            .foregroundColor(.white)
                         }
+                    } else {
+                        Button(action: {
+                            navigateToProfile = true
+                        }) {
+                            Text("Mi perfil: \(session.currentUser?.username ?? "Usuario")")
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.orange)
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
+                                .bold()
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
 
-                // Barra de búsqueda alineada a la izquierda
+                // Barra de búsqueda
                 TextField("Search", text: $searchText)
                     .textFieldStyle(PlainTextFieldStyle())
                     .padding(8)
                     .frame(width: 300, height: 36, alignment: .leading)
-                    .background(Color.gray.opacity(0.9))
+                    .background(Color.gray.opacity(1.0))
                     .cornerRadius(12)
             }
             .padding(.horizontal, 24)

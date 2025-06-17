@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct RegisterView: View {
+    @Environment(\.dismiss) var dismiss
     @EnvironmentObject var session: UserSession
     @State private var username: String = ""
     @State private var email: String = ""
@@ -77,20 +78,22 @@ struct RegisterView: View {
                     let dummyUser = User(
                         id: UUID(),
                         username: username,
-                        email: email,
-                        password: password,
+                        email: "",
+                        password: "",
                         image: nil
                     )
                     session.login(as: dummyUser)
+                    dismiss() // Cierra la hoja automáticamente
                 }) {
-                    Text("REGISTER")
+                    Text("LOGIN")
                         .fontWeight(.semibold)
                         .padding()
                         .frame(width: 300)
                         .background(Color.green)
-                        .cornerRadius(8)
                         .foregroundColor(.white)
+                        .cornerRadius(8)
                 }
+
                 .buttonStyle(PlainButtonStyle())
             }
         }

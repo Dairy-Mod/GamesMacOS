@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct LoginView: View {
+    @Environment(\.dismiss) var dismiss
     @EnvironmentObject var session: UserSession
     @State private var username: String = ""
     @State private var password: String = ""
@@ -68,15 +69,17 @@ struct LoginView: View {
                         image: nil
                     )
                     session.login(as: dummyUser)
+                    dismiss() // Cierra la hoja automáticamente
                 }) {
                     Text("LOGIN")
                         .fontWeight(.semibold)
                         .padding()
                         .frame(width: 300)
                         .background(Color.green)
-                        .cornerRadius(8)
                         .foregroundColor(.white)
+                        .cornerRadius(8)
                 }
+
                 .buttonStyle(PlainButtonStyle())
             }
         }

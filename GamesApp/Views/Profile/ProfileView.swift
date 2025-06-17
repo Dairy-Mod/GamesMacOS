@@ -2,6 +2,8 @@ import SwiftUI
 
 struct ProfileView: View {
     @EnvironmentObject var session: UserSession
+    @Environment(\.dismiss) var dismiss
+
     @State private var selectedFilter: GameStatus? = nil
     @State private var sortByRecent = true
 
@@ -9,20 +11,40 @@ struct ProfileView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Encabezado con título y nombre de usuario
-            VStack(alignment: .leading, spacing: 40) {
-                Text("BacklogApp")
-                    .font(.title.bold())
+            // Encabezado con botón de volver y título
+            HStack {
+                Button(action: {
+                    dismiss()
+                }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "chevron.left")
+                        Text("Back")
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.green.opacity(0.8))
                     .foregroundColor(.white)
-                    
+                    .cornerRadius(8)
+                }
+                .buttonStyle(PlainButtonStyle())
 
-                Text(session.currentUser?.username ?? "User")
-                    .font(.title3.bold())
+
+                Spacer()
+
+                Text("My Profile")
+                    .font(.title2.bold())
                     .foregroundColor(.white)
             }
             .padding(.horizontal)
 
-            // Filtros + ordenamiento
+
+            // Nombre del usuario
+            Text(session.currentUser?.username ?? "User")
+                .font(.title3.bold())
+                .foregroundColor(.red)
+                .padding(.horizontal)
+
+            // Filtros y ordenamiento
             HStack {
                 HStack(spacing: 20) {
                     ForEach(filters, id: \.self) { filter in
@@ -40,7 +62,6 @@ struct ProfileView: View {
 
                 Spacer()
 
-                // Botón de ordenamiento visualmente separado
                 Button(action: {
                     sortByRecent.toggle()
                 }) {
@@ -57,13 +78,12 @@ struct ProfileView: View {
             }
             .padding(.horizontal)
 
-            // Línea divisoria
             Rectangle()
                 .fill(Color.white.opacity(0.15))
                 .frame(height: 1)
                 .padding(.horizontal)
 
-            // Grid de juegos
+            // Lista de juegos
             ScrollView {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 20)], spacing: 20) {
                     ForEach(filteredGames, id: \.id) { game in
@@ -82,6 +102,7 @@ struct ProfileView: View {
                            endPoint: .bottom)
             .ignoresSafeArea()
         )
+        .frame(minWidth: 600, minHeight: 500) // <-- Ajusta tamaño mínimo de la ventana
     }
 
     var filteredGames: [Game] {
