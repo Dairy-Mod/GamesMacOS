@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HeaderView: View {
     @Binding var searchText: String
+    @EnvironmentObject var session: UserSession
 
     var body: some View {
         ZStack {
@@ -10,7 +11,7 @@ struct HeaderView: View {
                 Image("bannerFinal")
                     .resizable()
                     .scaledToFill()
-                    .frame(width: geometry.size.width, height: 200)
+                    .frame(maxWidth: .infinity, maxHeight: 200)
                     .clipped()
                     .overlay(
                         LinearGradient(
@@ -21,9 +22,8 @@ struct HeaderView: View {
                     )
             }
             .frame(height: 200)
-            .ignoresSafeArea(edges: .top) // Asegura que no se solape con el safe area
 
-            // Contenido del encabezado
+            // Contenido sobre la imagen
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Text("BacklogApp")
@@ -32,27 +32,34 @@ struct HeaderView: View {
 
                     Spacer()
 
-                    HStack(spacing: 16) {
-                        Button("Login") {
-                            // Acción de login
-                        }
-                        .buttonStyle(.plain)
-                        .foregroundColor(.white)
+                    // Login/Register o Nombre de Usuario
+                    if let username = session.currentUser?.username {
+                        Text(username)
+                            .foregroundColor(.white)
+                            .font(.subheadline.bold())
+                    } else {
+                        HStack(spacing: 16) {
+                            Button("Login") {
+                                // Acción de login
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundColor(.white)
 
-                        Button("Register") {
-                            // Acción de registro
+                            Button("Register") {
+                                // Acción de registro
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundColor(.white)
                         }
-                        .buttonStyle(.plain)
-                        .foregroundColor(.white)
                     }
                 }
 
-                // Barra de búsqueda
+                // Barra de búsqueda alineada a la izquierda
                 TextField("Search", text: $searchText)
                     .textFieldStyle(PlainTextFieldStyle())
                     .padding(8)
-                    .frame(width: 300, height: 36)
-                    .background(Color.gray)
+                    .frame(width: 300, height: 36, alignment: .leading)
+                    .background(Color.gray.opacity(0.9))
                     .cornerRadius(12)
             }
             .padding(.horizontal, 24)

@@ -7,6 +7,7 @@ class UserSession: ObservableObject {
     @Published var isLoggedIn: Bool = false
     @Published var currentUser: User? = nil
     @Published var usuarioGames: [UsuarioGame] = []
+    @Published var games : [Game] = []
 
     func login(as user: User) {
         self.currentUser = user

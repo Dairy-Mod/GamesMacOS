@@ -22,19 +22,22 @@ struct MainView: View {
                 }
                 .padding(.horizontal)
 
-
                 ScrollView {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 20)], spacing: 20) {
                         ForEach(filteredGames) { game in
-                            GameCardView(game: game)
+                            NavigationLink(destination: GameDetailView(game: game)) {
+                                GameCardView(game: game)
+                            }
+                            .buttonStyle(.plain)
                         }
+
                     }
                     .padding(.horizontal)
                 }
 
                 Spacer()
             }
-            .padding(.top, 100)
+
         }
 
         .background(

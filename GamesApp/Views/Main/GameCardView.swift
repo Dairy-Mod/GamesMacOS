@@ -38,10 +38,13 @@ struct GameCardView: View {
     private func imageCard(_ image: Image) -> some View {
         image
             .resizable()
-            .scaledToFit()
+            .aspectRatio(16/9, contentMode: .fill)
+            .frame(width: 140, height: 90) // Rectángulo horizontal
             .cornerRadius(12)
             .shadow(radius: 8)
+            .clipped()
     }
+
 
     private var placeholder: some View {
         Rectangle()
