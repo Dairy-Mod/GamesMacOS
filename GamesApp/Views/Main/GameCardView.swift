@@ -5,23 +5,20 @@ struct GameCardView: View {
     let game: Game
 
     var body: some View {
-        VStack {
+        VStack(spacing: 8) {
             if let imageName = game.image {
-                if imageName.starts(with: "http"),
-                   let url = URL(string: imageName) {
-                    // Imagen desde una URL
+                if imageName.starts(with: "http"), let url = URL(string: imageName) {
+                    // Imagen desde URL
                     AsyncImage(url: url) { phase in
                         switch phase {
                         case .success(let image):
                             imageCard(image)
-                        case .failure(_), .empty:
-                            placeholder
-                        @unknown default:
+                        default:
                             placeholder
                         }
                     }
                 } else {
-                    // Imagen desde assets
+                    // Imagen desde assets locales
                     if let nsImage = NSImage(named: imageName) {
                         imageCard(Image(nsImage: nsImage))
                     } else {
@@ -31,6 +28,15 @@ struct GameCardView: View {
             } else {
                 placeholder
             }
+
+            // Opcional: nombre del juego debajo
+            /*
+            Text(game.title)
+                .font(.caption)
+                .foregroundColor(.white)
+                .lineLimit(1)
+                .multilineTextAlignment(.center)
+            */
         }
         .frame(width: 140, height: 210)
     }
@@ -38,20 +44,18 @@ struct GameCardView: View {
     private func imageCard(_ image: Image) -> some View {
         image
             .resizable()
-            .aspectRatio(16/9, contentMode: .fill)
-            .frame(width: 140, height: 90) // Rectángulo horizontal
+            .aspectRatio(2/3, contentMode: .fill) // Portada vertical
+            .frame(width: 140, height: 210)
+            .clipped()
             .cornerRadius(12)
             .shadow(radius: 8)
-            .clipped()
     }
 
-
     private var placeholder: some View {
-        Rectangle()
+        RoundedRectangle(cornerRadius: 12)
             .fill(Color.gray.opacity(0.3))
-            .cornerRadius(12)
+            .frame(width: 140, height: 210)
             .shadow(radius: 4)
     }
 }
-
 

@@ -31,6 +31,7 @@ struct GameDetailView: View {
                             Text("BacklogApp")
                                 .font(.title.bold())
                                 .foregroundColor(.white)
+                                .padding(.top,50)
 
                             Spacer()
 
@@ -93,6 +94,7 @@ struct GameDetailView: View {
                             }
                         }
                         .padding(.horizontal)
+                        .padding(.top)
 
                         // Log Game
                         HStack(spacing: 16) {
@@ -127,6 +129,7 @@ struct GameDetailView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Review:")
                                 .foregroundColor(.white.opacity(0.7))
+
                             ZStack(alignment: .leading) {
                                 if userReview.isEmpty {
                                     Text("Write your review...")
@@ -142,6 +145,23 @@ struct GameDetailView: View {
                                     .textFieldStyle(PlainTextFieldStyle())
                             }
 
+                            // Botón para enviar la reseña
+                            Button(action: {
+                                // Acción: aquí podrías enviar la reseña a una API en el futuro
+                                print("Review guardada: \(userReview) con rating: \(userRating)")
+                                userReview = "" // Limpia el campo tras enviar
+                            }) {
+                                Text("Submit Review")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 6)
+                                    .background(Color.green.opacity(0.8))
+                                    .cornerRadius(6)
+                                    .shadow(radius: 2)
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.top, 16)
                         }
                         .padding(.horizontal)
 

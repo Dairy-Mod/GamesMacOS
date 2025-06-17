@@ -1,7 +1,22 @@
 import SwiftUI
 
 struct MainView: View {
-    @State private var games: [Game] = []
+    @State private var games: [Game] = [
+        Game(
+            id: UUID(),
+            title: "Mock Game",
+            desc: "This is a test game to preview the GameDetailView.",
+            review: "amazing game",
+            rating: 5,
+            releaseDate: Date(),
+            developer: "Dev Studio",
+            publisher: "Pub Studio",
+            platform: ["macOS", "Windows"],
+            genres: ["Action", "Adventure"],
+            image: "ac2"
+        )
+    ]
+
     @State private var searchText: String = ""
     @State private var showLogin = false
     @State private var showRegister = false
@@ -73,13 +88,7 @@ struct MainView: View {
                 ProfileView()
                     .environmentObject(session)
             }
-            .task {
-                do {
-                    self.games = try await GameService.shared.fetchGames()
-                } catch {
-                    print("Failed to load games: \(error)")
-                }
-            }
+            
         }
     }
 
