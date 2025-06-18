@@ -3,7 +3,7 @@ import SwiftUI
 struct ProfileView: View {
     @EnvironmentObject var session: UserSession
     @Environment(\.dismiss) var dismiss
-
+    @Binding var navigateToProfile: Bool
     @State private var selectedFilter: GameStatus? = nil
     @State private var sortByRecent = true
 
@@ -30,10 +30,28 @@ struct ProfileView: View {
 
 
                 Spacer()
+                
+                VStack {
+                    Text("My Profile")
+                        .font(.title2.bold())
+                        .foregroundColor(.white)
+                    
+                    Button(action: {
+                        session.logout()
+                        navigateToProfile = false
+                    }) {
+                        Text("Cerrar sesión")
+                            .font(.subheadline.bold())
+                            .foregroundColor(.red)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Color.black.opacity(0.1))
+                            .cornerRadius(8)
+                    }
+                    .buttonStyle(.plain)
 
-                Text("My Profile")
-                    .font(.title2.bold())
-                    .foregroundColor(.white)
+                }
+            
             }
             .padding(.horizontal)
 
@@ -41,8 +59,9 @@ struct ProfileView: View {
             // Nombre del usuario
             Text(session.currentUser?.username ?? "User")
                 .font(.title3.bold())
-                .foregroundColor(.red)
+                .foregroundColor(.blue)
                 .padding(.horizontal)
+                .bold()
 
             // Filtros y ordenamiento
             HStack {

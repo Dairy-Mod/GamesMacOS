@@ -23,6 +23,7 @@ struct MainView: View {
     @State private var navigateToProfile = false
     @EnvironmentObject var session: UserSession
 
+
     var body: some View {
         NavigationStack {
             ZStack(alignment: .top) {
@@ -85,7 +86,7 @@ struct MainView: View {
             }
             // Navegación a ProfileView
             .navigationDestination(isPresented: $navigateToProfile) {
-                ProfileView()
+                ProfileView(navigateToProfile: $navigateToProfile)
                     .environmentObject(session)
             }
             
