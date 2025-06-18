@@ -106,8 +106,14 @@ struct ProfileView: View {
             ScrollView {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 20)], spacing: 20) {
                     ForEach(filteredGames, id: \.id) { game in
-                        GameCardView(game: game)
+                        if let entry = session.usuarioGames.first(where: { $0.juegoId == game.id }) {
+                            NavigationLink(value: game) {
+                                UserGameCardView(game: game, entry: entry)
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
+
                 }
                 .padding(.horizontal)
             }

@@ -1,64 +1,60 @@
 import SwiftUI
 
 struct MainView: View {
-    @State private var games: [Game] = [
-        Game(
-            id: UUID(),
-            title: "Mock Game",
-            desc: "This is a test game to preview the GameDetailView.",
-            review: "amazing game",
-            rating: 5,
-            releaseDate: Date(),
-            developer: "Dev Studio",
-            publisher: "Pub Studio",
-            platform: ["macOS", "Windows"],
-            genres: ["Action", "Adventure"],
-            image: "ac2"
-        )
-    ]
-
+    @State private var games: [Game] = []
     @State private var searchText: String = ""
     @State private var showLogin = false
     @State private var showRegister = false
     @State private var navigateToProfile = false
+    @State private var isLoading = true
     @EnvironmentObject var session: UserSession
-
 
     var body: some View {
         NavigationStack {
             ZStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 20) {
-                    HeaderView(
-                        searchText: $searchText,
-                        showLogin: $showLogin,
-                        showRegister: $showRegister,
-                        navigateToProfile: $navigateToProfile
-                    )
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Games")
-                            .font(.title2.bold())
+                if isLoading {
+                    VStack {
+                        Spacer()
+                        ProgressView("Loading games...")
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             .foregroundColor(.white)
-
-                        Rectangle()
-                            .fill(Color.white.opacity(0.6))
-                            .frame(height: 1)
+                            .scaleEffect(1.4)
+                        Spacer()
                     }
-                    .padding(.horizontal)
+                } else {
+                    VStack(alignment: .leading, spacing: 20) {
+                        HeaderView(
+                            searchText: $searchText,
+                            showLogin: $showLogin,
+                            showRegister: $showRegister,
+                            navigateToProfile: $navigateToProfile
+                        )
 
-                    ScrollView {
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 20)], spacing: 20) {
-                            ForEach(filteredGames) { game in
-                                NavigationLink(value: game) {
-                                    GameCardView(game: game)
-                                }
-                                .buttonStyle(.plain)
-                            }
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Games")
+                                .font(.title2.bold())
+                                .foregroundColor(.white)
+
+                            Rectangle()
+                                .fill(Color.white.opacity(0.6))
+                                .frame(height: 1)
                         }
                         .padding(.horizontal)
-                    }
 
-                    Spacer()
+                        ScrollView {
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 20)], spacing: 20) {
+                                ForEach(filteredGames) { game in
+                                    NavigationLink(value: game) {
+                                        GameCardView(game: game)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+
+                        Spacer()
+                    }
                 }
             }
             .background(
@@ -73,23 +69,38 @@ struct MainView: View {
                 .ignoresSafeArea()
             )
             .sheet(isPresented: $showLogin) {
-                LoginView()
-                    .environmentObject(session)
+                LoginView().environmentObject(session)
             }
             .sheet(isPresented: $showRegister) {
-                RegisterView()
-                    .environmentObject(session)
+                RegisterView().environmentObject(session)
             }
-            // Navegación a GameDetailView
             .navigationDestination(for: Game.self) { selectedGame in
                 GameDetailView(game: selectedGame)
             }
-            // Navegación a ProfileView
             .navigationDestination(isPresented: $navigateToProfile) {
                 ProfileView(navigateToProfile: $navigateToProfile)
                     .environmentObject(session)
             }
-            
+            .onAppear {
+                loadGames()
+            }
+        }
+    }
+
+    private func loadGames() {
+        Task {
+            do {
+                let fetched = try await GameService.shared.fetchGames()
+                await MainActor.run {
+                    self.games = fetched
+                    self.isLoading = false
+                }
+            } catch {
+                print("Error al obtener juegos: \(error)")
+                await MainActor.run {
+                    self.isLoading = false
+                }
+            }
         }
     }
 
