@@ -9,20 +9,24 @@ struct HeaderView: View {
 
     var body: some View {
         ZStack {
-            // Imagen de fondo con degradado
+            // Imagen de fondo con degradado (validación para macOS)
             GeometryReader { geometry in
-                Image("bannerFinal")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(maxWidth: .infinity, maxHeight: 200)
-                    .clipped()
-                    .overlay(
-                        LinearGradient(
-                            gradient: Gradient(colors: [Color.black.opacity(0.4), Color.clear]),
-                            startPoint: .top,
-                            endPoint: .bottom
+                if NSImage(named: "bannerFinal") != nil {
+                    Image("bannerFinal")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(maxWidth: .infinity, maxHeight: 200)
+                        .clipped()
+                        .overlay(
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color.black.opacity(0.4), Color.clear]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
                         )
-                    )
+                } else {
+                    Color.black.opacity(0.4) // fallback si no existe la imagen
+                }
             }
             .frame(height: 200)
 
@@ -56,11 +60,11 @@ struct HeaderView: View {
                             }
                             .buttonStyle(.plain)
                         }
-                    } else {
+                    } else if let username = session.currentUser?.username {
                         Button(action: {
                             navigateToProfile = true
                         }) {
-                            Text("Mi perfil: \(session.currentUser?.username ?? "Usuario")")
+                            Text("Mi perfil: \(username)")
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)
                                 .background(Color.orange)

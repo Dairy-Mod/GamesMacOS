@@ -84,6 +84,15 @@ struct MainView: View {
             .onAppear {
                 loadGames()
             }
+            
+            .alert("Error", isPresented: .constant(session.errorMessage != nil), actions: {
+                Button("OK") {
+                    session.errorMessage = nil
+                }
+            }, message: {
+                Text(session.errorMessage ?? "")
+            })
+
         }
     }
 
@@ -96,13 +105,14 @@ struct MainView: View {
                     self.isLoading = false
                 }
             } catch {
-                print("Error al obtener juegos: \(error)")
                 await MainActor.run {
+                    session.errorMessage = "Error al obtener juegos: \(error.localizedDescription)"
                     self.isLoading = false
                 }
             }
         }
     }
+
 
     var filteredGames: [Game] {
         if searchText.isEmpty { return games }

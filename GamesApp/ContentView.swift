@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject var session: UserSession
+    
     var body: some View {
         NavigationStack {
             MainView()

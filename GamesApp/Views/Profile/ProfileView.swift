@@ -6,12 +6,13 @@ struct ProfileView: View {
     @Binding var navigateToProfile: Bool
     @State private var selectedFilter: GameStatus? = nil
     @State private var sortByRecent = true
+    @State private var isLoading = true
 
     let filters: [GameStatus?] = [nil, .completed, .playing, .backlog]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Encabezado con botón de volver y título
+            // Header
             HStack {
                 Button(action: {
                     dismiss()
@@ -28,14 +29,13 @@ struct ProfileView: View {
                 }
                 .buttonStyle(PlainButtonStyle())
 
-
                 Spacer()
-                
+
                 VStack {
                     Text("My Profile")
                         .font(.title2.bold())
                         .foregroundColor(.white)
-                    
+
                     Button(action: {
                         session.logout()
                         navigateToProfile = false
@@ -49,19 +49,15 @@ struct ProfileView: View {
                             .cornerRadius(8)
                     }
                     .buttonStyle(.plain)
-
                 }
-            
             }
             .padding(.horizontal)
 
-
-            // Nombre del usuario
+            // Nombre de usuario
             Text(session.currentUser?.username ?? "User")
                 .font(.title3.bold())
                 .foregroundColor(.blue)
                 .padding(.horizontal)
-                .bold()
 
             // Filtros y ordenamiento
             HStack {
@@ -103,31 +99,66 @@ struct ProfileView: View {
                 .padding(.horizontal)
 
             // Lista de juegos
-            ScrollView {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 20)], spacing: 20) {
-                    ForEach(filteredGames, id: \.id) { game in
-                        if let entry = session.usuarioGames.first(where: { $0.juegoId == game.id }) {
-                            NavigationLink(value: game) {
-                                UserGameCardView(game: game, entry: entry)
+            if isLoading {
+                Spacer()
+                HStack {
+                    Spacer()
+                    ProgressView("Cargando juegos...")
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .foregroundColor(.white)
+                        .scaleEffect(1.3)
+                    Spacer()
+                }
+                Spacer()
+            } else if filteredGames.isEmpty {
+                Spacer()
+                Text("No hay juegos registrados.")
+                    .foregroundColor(.white.opacity(0.6))
+                    .font(.title3)
+                    .padding(.horizontal)
+                Spacer()
+            } else {
+                ScrollView {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 20)], spacing: 20) {
+                        ForEach(filteredGames, id: \.id) { game in
+                            if let entry = session.usuarioGames.first(where: { $0.juegoId == game.id }) {
+                                NavigationLink(value: game) {
+                                    UserGameCardView(game: game, entry: entry)
+                                }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
                         }
                     }
-
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
             }
 
             Spacer()
         }
         .padding(.top, 40)
         .background(
-            LinearGradient(gradient: Gradient(colors: [Color(red: 0.1, green: 0.1, blue: 0.1), Color(red: 0.18, green: 0.0, blue: 0.0)]),
-                           startPoint: .top,
-                           endPoint: .bottom)
+            LinearGradient(gradient: Gradient(colors: [
+                Color(red: 0.1, green: 0.1, blue: 0.1),
+                Color(red: 0.18, green: 0.0, blue: 0.0)
+            ]), startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea()
         )
-        .frame(minWidth: 600, minHeight: 500) // <-- Ajusta tamaño mínimo de la ventana
+        .frame(minWidth: 600, minHeight: 500)
+        
+        .alert("Error", isPresented: .constant(session.errorMessage != nil), actions: {
+            Button("OK") {
+                session.errorMessage = nil
+            }
+        }, message: {
+            Text(session.errorMessage ?? "")
+        })
+
+        .onAppear {
+            Task {
+                await session.cargarDatosUsuario()
+                isLoading = false
+            }
+        }
     }
 
     var filteredGames: [Game] {
@@ -153,6 +184,7 @@ struct ProfileView: View {
                 game.id == entry.juegoId
             }
         }
+        
     }
 }
 

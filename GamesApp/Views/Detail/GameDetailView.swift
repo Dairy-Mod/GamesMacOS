@@ -99,7 +99,7 @@ struct GameDetailView: View {
                         // Log Game
                         HStack(spacing: 16) {
                             Button(action: {
-                                // Acción
+                                logGame()
                             }) {
                                 Text("Log Game")
                                     .font(.system(size: 14, weight: .semibold))
@@ -111,7 +111,6 @@ struct GameDetailView: View {
                                     .shadow(radius: 2)
                             }
                             .buttonStyle(.plain)
-
 
                             HStack(spacing: 4) {
                                 ForEach(1...5, id: \.self) { index in
@@ -147,9 +146,7 @@ struct GameDetailView: View {
 
                             // Botón para enviar la reseña
                             Button(action: {
-                                // Acción: aquí podrías enviar la reseña a una API en el futuro
-                                print("Review guardada: \(userReview) con rating: \(userRating)")
-                                userReview = "" // Limpia el campo tras enviar
+                                submitReview()
                             }) {
                                 Text("Submit Review")
                                     .font(.system(size: 14, weight: .semibold))
@@ -180,6 +177,44 @@ struct GameDetailView: View {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter.string(from: date)
+    }
+
+    // Acción para registrar el juego
+    func logGame() {
+        guard let user = session.currentUser,
+              let userId = user.id,
+              let gameId = game.id else {
+            print("Faltan datos para registrar juego")
+            return
+        }
+
+        let nuevoLog = UsuarioGame(
+            id: UUID(),
+            usuarioId: userId,                // UUID desempaquetado
+            juegoId: gameId,
+            status: status,
+            review: userReview,
+            rating: Double(userRating),
+            fechaAgregado: Date()
+        )
+
+        do {
+            Task {
+                do {
+                    try await UsuarioGameService.shared.create(nuevoLog)
+                    session.usuarioGames.append(nuevoLog)
+                    print("Juego registrado correctamente")
+                } catch {
+                    print("Error al registrar juego: \(error)")
+                }
+            }
+        }
+    }
+
+    // Acción para enviar la reseña
+    func submitReview() {
+        print("Review guardada: \(userReview) con rating: \(userRating)")
+        userReview = "" // Limpia el campo tras enviar
     }
 }
 

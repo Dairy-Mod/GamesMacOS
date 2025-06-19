@@ -29,14 +29,12 @@ struct GameCardView: View {
                 placeholder
             }
 
-            // Opcional: nombre del juego debajo
-            /*
+            // Título opcional
             Text(game.title)
                 .font(.caption)
                 .foregroundColor(.white)
                 .lineLimit(1)
                 .multilineTextAlignment(.center)
-            */
         }
         .frame(width: 140, height: 210)
     }
@@ -44,7 +42,7 @@ struct GameCardView: View {
     private func imageCard(_ image: Image) -> some View {
         image
             .resizable()
-            .aspectRatio(2/3, contentMode: .fill) // Portada vertical
+            .aspectRatio(2/3, contentMode: .fill)
             .frame(width: 140, height: 210)
             .clipped()
             .cornerRadius(12)

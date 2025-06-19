@@ -14,7 +14,8 @@ struct UserGameCardView: View {
                     AsyncImage(url: url) { phase in
                         switch phase {
                         case .success(let image):
-                            image.resizable()
+                            image
+                                .resizable()
                                 .aspectRatio(9/16, contentMode: .fill)
                                 .frame(width: 140, height: 180)
                                 .clipped()
@@ -23,13 +24,15 @@ struct UserGameCardView: View {
                             placeholder
                         }
                     }
-                } else {
-                    Image(imageName)
+                } else if let nsImage = NSImage(named: imageName) {
+                    Image(nsImage: nsImage)
                         .resizable()
                         .aspectRatio(9/16, contentMode: .fill)
                         .frame(width: 140, height: 180)
                         .clipped()
                         .cornerRadius(12)
+                } else {
+                    placeholder
                 }
             } else {
                 placeholder
@@ -63,7 +66,6 @@ struct UserGameCardView: View {
                     .foregroundColor(.white)
                     .cornerRadius(4)
 
-                // Botón eliminar
                 Button(role: .destructive) {
                     showConfirmation = true
                 } label: {
@@ -109,7 +111,9 @@ struct UserGameCardView: View {
                 session.usuarioGames.removeAll { $0.id == id }
             }
         } catch {
-            print("Error al eliminar juego: \(error)")
+            await MainActor.run {
+                session.errorMessage = "No se pudo eliminar el juego: \(error.localizedDescription)"
+            }
         }
     }
 }
