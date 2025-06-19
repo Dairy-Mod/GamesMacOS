@@ -12,26 +12,33 @@ struct GameDetailView: View {
         GeometryReader { geometry in
             ScrollView {
                 ZStack(alignment: .topLeading) {
-                    // Fondo con imagen borrosa
+                    // Imagen de fondo
                     if let imageName = game.image,
-                       let nsImage = NSImage(named: imageName) {
-                        Image(nsImage: nsImage)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: geometry.size.width, height: geometry.size.height)
-                            .clipped()
-                            .blur(radius: 30)
-                            .overlay(Color.black.opacity(0.5))
-                            .ignoresSafeArea()
+                       let url = URL(string: imageName) {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: geometry.size.width, height: geometry.size.height)
+                                    .clipped()
+                                    .blur(radius: 30)
+                                    .overlay(Color.black.opacity(0.5))
+                            default:
+                                EmptyView()
+                            }
+                        }
+                        .ignoresSafeArea()
                     }
 
                     VStack(alignment: .leading, spacing: 20) {
-                        // Header
+                        // Encabezado
                         HStack {
                             Text("BacklogApp")
                                 .font(.title.bold())
                                 .foregroundColor(.white)
-                                .padding(.top,50)
+                                .padding(.top, 50)
 
                             Spacer()
 
@@ -40,15 +47,24 @@ struct GameDetailView: View {
                         }
                         .padding(.horizontal)
 
-                        // Info del juego
+                        // Información del juego
                         HStack(alignment: .top, spacing: 24) {
                             if let imageName = game.image,
-                               let nsImage = NSImage(named: imageName) {
-                                Image(nsImage: nsImage)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 150)
-                                    .cornerRadius(12)
+                               let url = URL(string: imageName) {
+                                AsyncImage(url: url) { phase in
+                                    switch phase {
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 150)
+                                            .cornerRadius(12)
+                                    default:
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Color.gray.opacity(0.4))
+                                            .frame(width: 150, height: 220)
+                                    }
+                                }
                             }
 
                             VStack(alignment: .leading, spacing: 8) {
@@ -97,20 +113,17 @@ struct GameDetailView: View {
                         .padding(.top)
 
                         // Log Game
-                        HStack(spacing: 16) {
-                            Button(action: {
-                                logGame()
-                            }) {
-                                Text("Log Game")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 6)
-                                    .background(Color.blue.opacity(0.8))
-                                    .cornerRadius(6)
-                                    .shadow(radius: 2)
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Your Status:")
+                                .foregroundColor(.white.opacity(0.7))
+
+                            Picker("Status", selection: $status) {
+                                Text("Backlog").tag(GameStatus.backlog)
+                                Text("Playing").tag(GameStatus.playing)
+                                Text("Completed").tag(GameStatus.completed)
                             }
-                            .buttonStyle(.plain)
+                            .pickerStyle(SegmentedPickerStyle())
+                            .padding(.bottom, 8)
 
                             HStack(spacing: 4) {
                                 ForEach(1...5, id: \.self) { index in
@@ -121,11 +134,7 @@ struct GameDetailView: View {
                                         }
                                 }
                             }
-                        }
-                        .padding(.horizontal)
 
-                        // Review
-                        VStack(alignment: .leading, spacing: 8) {
                             Text("Review:")
                                 .foregroundColor(.white.opacity(0.7))
 
@@ -141,14 +150,12 @@ struct GameDetailView: View {
                                     .padding(10)
                                     .background(Color.gray.opacity(0.2))
                                     .cornerRadius(8)
-                                    .textFieldStyle(PlainTextFieldStyle())
                             }
 
-                            // Botón para enviar la reseña
                             Button(action: {
-                                submitReview()
+                                logGame()
                             }) {
-                                Text("Submit Review")
+                                Text("Log Game")
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundColor(.white)
                                     .padding(.horizontal, 16)
@@ -157,8 +164,7 @@ struct GameDetailView: View {
                                     .cornerRadius(6)
                                     .shadow(radius: 2)
                             }
-                            .buttonStyle(.plain)
-                            .padding(.top, 16)
+                            .padding(.top, 8)
                         }
                         .padding(.horizontal)
 
@@ -168,7 +174,6 @@ struct GameDetailView: View {
                 }
                 .frame(minHeight: geometry.size.height)
             }
-            .ignoresSafeArea()
         }
     }
 
@@ -179,18 +184,20 @@ struct GameDetailView: View {
         return formatter.string(from: date)
     }
 
-    // Acción para registrar el juego
     func logGame() {
-        guard let user = session.currentUser,
-              let userId = user.id,
-              let gameId = game.id else {
-            print("Faltan datos para registrar juego")
+        guard let userId = session.currentUser?.id else {
+            print("Falta ID de usuario")
+            return
+        }
+
+        guard let gameId = game.id else {
+            print("Falta ID del juego")
             return
         }
 
         let nuevoLog = UsuarioGame(
             id: UUID(),
-            usuarioId: userId,                // UUID desempaquetado
+            usuarioId: userId,
             juegoId: gameId,
             status: status,
             review: userReview,
@@ -198,23 +205,20 @@ struct GameDetailView: View {
             fechaAgregado: Date()
         )
 
-        do {
-            Task {
-                do {
-                    try await UsuarioGameService.shared.create(nuevoLog)
-                    session.usuarioGames.append(nuevoLog)
-                    print("Juego registrado correctamente")
-                } catch {
-                    print("Error al registrar juego: \(error)")
-                }
+        Task {
+            do {
+                try await UsuarioGameService.shared.create(nuevoLog)
+                session.usuarioGames.append(nuevoLog)
+                print("Juego registrado correctamente")
+            } catch {
+                print("Error al registrar juego: \(error)")
             }
         }
     }
 
-    // Acción para enviar la reseña
     func submitReview() {
         print("Review guardada: \(userReview) con rating: \(userRating)")
-        userReview = "" // Limpia el campo tras enviar
+        userReview = ""
     }
 }
 

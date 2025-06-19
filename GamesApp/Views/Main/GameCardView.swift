@@ -18,7 +18,7 @@ struct GameCardView: View {
                         }
                     }
                 } else {
-                    // Imagen desde assets locales
+                    // Imagen desde assets locales (si aplicable)
                     if let nsImage = NSImage(named: imageName) {
                         imageCard(Image(nsImage: nsImage))
                     } else {
@@ -29,7 +29,7 @@ struct GameCardView: View {
                 placeholder
             }
 
-            // Título opcional
+            // Título del juego
             Text(game.title)
                 .font(.caption)
                 .foregroundColor(.white)

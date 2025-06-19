@@ -12,7 +12,7 @@ struct ProfileView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Header
+            // Encabezado
             HStack {
                 Button(action: {
                     dismiss()
@@ -144,15 +144,13 @@ struct ProfileView: View {
             .ignoresSafeArea()
         )
         .frame(minWidth: 600, minHeight: 500)
-        
-        .alert("Error", isPresented: .constant(session.errorMessage != nil), actions: {
+        .alert("Error", isPresented: .constant(session.errorMessage != nil)) {
             Button("OK") {
                 session.errorMessage = nil
             }
-        }, message: {
+        } message: {
             Text(session.errorMessage ?? "")
-        })
-
+        }
         .onAppear {
             Task {
                 await session.cargarDatosUsuario()
@@ -161,6 +159,7 @@ struct ProfileView: View {
         }
     }
 
+    // Filtro + ordenamiento
     var filteredGames: [Game] {
         let userGames = session.usuarioGames
         let filtered = selectedFilter != nil
@@ -184,7 +183,6 @@ struct ProfileView: View {
                 game.id == entry.juegoId
             }
         }
-        
     }
 }
 

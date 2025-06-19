@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 struct UserGameCardView: View {
     let game: Game
