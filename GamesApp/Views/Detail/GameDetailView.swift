@@ -4,8 +4,6 @@ struct GameDetailView: View {
     let game: Game
     @EnvironmentObject var session: UserSession
 
-    @State private var userReview: String = ""
-    @State private var userRating: Int = 0
     @State private var status: GameStatus = .backlog
 
     var body: some View {
@@ -125,33 +123,6 @@ struct GameDetailView: View {
                             .pickerStyle(SegmentedPickerStyle())
                             .padding(.bottom, 8)
 
-                            HStack(spacing: 4) {
-                                ForEach(1...5, id: \.self) { index in
-                                    Image(systemName: index <= userRating ? "star.fill" : "star")
-                                        .foregroundColor(.yellow)
-                                        .onTapGesture {
-                                            userRating = index
-                                        }
-                                }
-                            }
-
-                            Text("Review:")
-                                .foregroundColor(.white.opacity(0.7))
-
-                            ZStack(alignment: .leading) {
-                                if userReview.isEmpty {
-                                    Text("Write your review...")
-                                        .foregroundColor(.white.opacity(0.5))
-                                        .padding(10)
-                                }
-
-                                TextField("", text: $userReview)
-                                    .foregroundColor(.white)
-                                    .padding(10)
-                                    .background(Color.gray.opacity(0.2))
-                                    .cornerRadius(8)
-                            }
-
                             Button(action: {
                                 logGame()
                             }) {
@@ -200,8 +171,6 @@ struct GameDetailView: View {
             usuarioId: userId,
             juegoId: gameId,
             status: status,
-            review: userReview,
-            rating: Double(userRating),
             fechaAgregado: Date()
         )
 
@@ -214,11 +183,6 @@ struct GameDetailView: View {
                 print("Error al registrar juego: \(error)")
             }
         }
-    }
-
-    func submitReview() {
-        print("Review guardada: \(userReview) con rating: \(userRating)")
-        userReview = ""
     }
 }
 

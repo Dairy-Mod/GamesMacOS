@@ -46,19 +46,6 @@ struct UserGameCardView: View {
                     .foregroundColor(.white)
                     .lineLimit(1)
 
-                if let review = entry.review, !review.isEmpty {
-                    Text("💬 \(review)")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                        .lineLimit(1)
-                }
-
-                if let rating = entry.rating {
-                    Text("⭐ \(String(format: "%.1f", rating))/5")
-                        .font(.caption)
-                        .foregroundColor(.yellow)
-                }
-
                 Text("🎮 \(entry.status.rawValue)")
                     .font(.caption2)
                     .padding(.horizontal, 6)
